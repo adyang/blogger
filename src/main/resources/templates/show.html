@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${article.title}">Article</title>
+    <link rel="stylesheet" href="/css/screen.css" />
+</head>
+<body>
+    <h1 th:text="${article.title}">Article Title</h1>
+    <p th:text="${article.body}">Article Body</p>
+    <a th:href="@{/articles}"><< Back to Articles List</a>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All Articles</title>
+    <link rel="stylesheet" href="/css/screen.css" />
+</head>
+<body>
+    <h1>All Articles</h1>
+
+    <ul id="articles">
+        <li th:each="article : ${articles}">
+            <a th:href="@{/articles/{id}(id=${article.id})}">
+                <span th:text="${article.title}">Article Title</span>
+            </a>
+        </li>
+    </ul>
+
+    <a th:href="@{/articles/new}" class="new_article">Create a New Article</a>
+</body>
+</html>
