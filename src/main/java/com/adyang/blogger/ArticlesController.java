@@ -6,14 +6,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/articles")
 public class ArticlesController {
+    private static final String ARTICLE_FORM = "articleForm";
+    private static final String FLASH_NOTICE = "flashNotice";
+
     private ArticleRepository articleRepository;
 
     @Autowired
@@ -21,18 +24,73 @@ public class ArticlesController {
         this.articleRepository = articleRepository;
     }
 
-    @GetMapping("/articles")
+    @GetMapping
     public String index(Model model) {
         Iterable<Article> articles = articleRepository.findAll();
         model.addAttribute("articles", articles);
         return "index";
     }
 
-    @GetMapping("/articles/{id}")
+    @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) {
         Optional<Article> article = articleRepository.findById(id);
         model.addAttribute("article", article.orElseThrow(ArticleNotFound::new));
         return "show";
+    }
+
+    @GetMapping("/new")
+    public String newForm(Model model) {
+        model.addAttribute(ARTICLE_FORM, new ArticleForm());
+        return "new";
+    }
+
+    @PostMapping
+    public String create(ArticleForm articleForm, RedirectAttributes model) {
+        Article newArticle = new Article(articleForm.getTitle(), articleForm.getBody());
+        Article savedArticle = articleRepository.save(newArticle);
+
+        model.addFlashAttribute(FLASH_NOTICE, String.format("Article '%s' Created!", savedArticle.getTitle()));
+
+        return "redirect:/articles/" + savedArticle.getId();
+    }
+
+    @DeleteMapping("/{id}")
+    public String destroy(@PathVariable Long id, RedirectAttributes model) {
+        Article article = findArticleBy(id);
+        articleRepository.deleteById(id);
+        model.addFlashAttribute(FLASH_NOTICE, String.format("Article '%s' Deleted!", article.getTitle()));
+        return "redirect:/articles";
+    }
+
+    private Article findArticleBy(Long id) {
+        Optional<Article> foundArticle = articleRepository.findById(id);
+        return foundArticle.orElseThrow(ArticleNotFound::new);
+    }
+
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable Long id, Model model) {
+        Optional<Article> article = articleRepository.findById(id);
+        ArticleForm articleForm = article
+                .map(a -> new ArticleForm(a.getId(), a.getTitle(), a.getBody()))
+                .orElseThrow(ArticleNotFound::new);
+        model.addAttribute(ARTICLE_FORM, articleForm);
+        return "edit";
+    }
+
+    @PutMapping("/{id}")
+    public String update(@PathVariable Long id, ArticleForm articleForm, RedirectAttributes model) {
+        Article article = findArticleBy(id);
+        mapArticle(articleForm, article);
+        articleRepository.save(article);
+
+        model.addFlashAttribute(FLASH_NOTICE, String.format("Article '%s' Updated!", article.getTitle()));
+
+        return "redirect:/articles/" + article.getId();
+    }
+
+    private void mapArticle(ArticleForm articleForm, Article article) {
+        article.setTitle(articleForm.getTitle());
+        article.setBody(articleForm.getBody());
     }
 
     @Bean
@@ -43,7 +101,7 @@ public class ArticlesController {
         };
     }
 
-    @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="Article no longer available")
+    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Article no longer available")
     private class ArticleNotFound extends RuntimeException {
     }
 }

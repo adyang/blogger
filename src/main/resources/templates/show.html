@@ -1,13 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-    <meta charset="UTF-8">
     <title th:text="${article.title}">Article</title>
-    <link rel="stylesheet" href="/css/screen.css" />
 </head>
 <body>
-    <h1 th:text="${article.title}">Article Title</h1>
-    <p th:text="${article.body}">Article Body</p>
-    <a th:href="@{/articles}"><< Back to Articles List</a>
+    <div layout:fragment="content">
+        <h1 th:text="${article.title}">Article Title</h1>
+        <p th:text="${article.body}">Article Body</p>
+
+        <form th:action="@{/articles/{id}(id=${article.id})}" th:method="delete" id="delete-link">
+            <a href="#" onclick="if (window.confirm('Really delete the article?')) document.getElementById('delete-link').submit();">
+                delete
+            </a>
+        </form>
+        <a th:href="@{/articles/{id}/edit(id=${article.id})}">edit</a>
+        <a th:href="@{/articles}"><< Back to Articles List</a>
+    </div>
 </body>
 </html>

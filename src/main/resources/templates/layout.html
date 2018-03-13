@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">Blogger</title>
+    <link rel="stylesheet" href="/css/screen.css" />
+</head>
+<body>
+    <p class="flash" th:if="${flashNotice}" th:text="${flashNotice}">Flash Notice</p>
+
+    <div layout:fragment="content">
+        <p>Page Content</p>
+    </div>
+</body>
+</html>

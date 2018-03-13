@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Create a New Article</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h1>Create a New Article</h1>
+
+        <form method="POST" action="#" th:action="@{/articles}" th:object="${articleForm}">
+            <ul>
+                <li th:each="err : ${#fields.errors('*')}" th:text="${err}" />
+            </ul>
+            <p th:class="${#fields.hasErrors('title')}? field_with_errors">
+                <label for="title">Title</label><br />
+                <input type="text" th:field="*{title}" />
+            </p>
+            <p th:class="${#fields.hasErrors('body')}? field_with_errors">
+                <label for="body">Body</label><br />
+                <textarea th:field="*{body}" />
+            </p>
+            <p>
+                <input type="submit" value="Create" />
+            </p>
+        </form>
+    </div>
+</body>
+</html>

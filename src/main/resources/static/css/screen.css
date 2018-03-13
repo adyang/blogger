@@ -642,11 +642,11 @@ input[type=submit]:active, input[type=submit]:active:visited {
     color: #fff
 }
 
-div.field_with_errors label {
+p.field_with_errors label {
     color: red;
     font-weight: bold
 }
 
-div.field_with_errors input {
+p.field_with_errors input {
     border: 3px solid red
 }
