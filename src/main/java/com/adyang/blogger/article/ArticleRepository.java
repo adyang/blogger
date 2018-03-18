@@ -1,4 +1,4 @@
-package com.adyang.blogger;
+package com.adyang.blogger.article;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.CrudRepository;

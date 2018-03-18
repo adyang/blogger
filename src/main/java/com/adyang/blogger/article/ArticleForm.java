@@ -1,4 +1,4 @@
-package com.adyang.blogger;
+package com.adyang.blogger.article;
 
 import lombok.Data;
 

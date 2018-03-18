@@ -1,6 +1,9 @@
-package com.adyang.blogger;
+package com.adyang.blogger.article;
 
+import com.adyang.blogger.comment.Comment;
+import com.adyang.blogger.entity.BaseEntity;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -14,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@NoArgsConstructor
 @Entity
 public class Article extends BaseEntity {
     private String title;
@@ -21,9 +25,6 @@ public class Article extends BaseEntity {
     private String body;
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
     List<Comment> comments = new ArrayList<>();
-
-    protected Article() {
-    }
 
     public Article(String title, String body) {
         this.title = title;

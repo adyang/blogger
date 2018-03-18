@@ -1,6 +1,9 @@
-package com.adyang.blogger;
+package com.adyang.blogger.comment;
 
+import com.adyang.blogger.article.Article;
+import com.adyang.blogger.entity.BaseEntity;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.ocpsoft.prettytime.PrettyTime;
@@ -15,6 +18,7 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@NoArgsConstructor
 @Entity
 public class Comment extends BaseEntity {
     private String authorName;
@@ -22,9 +26,6 @@ public class Comment extends BaseEntity {
     private String body;
     @ManyToOne
     private Article article;
-
-    protected Comment() {
-    }
 
     public Comment(String authorName, String body) {
         this.authorName = authorName;

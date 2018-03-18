@@ -1,5 +1,8 @@
-package com.adyang.blogger;
+package com.adyang.blogger.comment;
 
+import com.adyang.blogger.article.Article;
+import com.adyang.blogger.article.ArticleNotFound;
+import com.adyang.blogger.article.ArticleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;

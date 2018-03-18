@@ -1,5 +1,7 @@
-package com.adyang.blogger;
+package com.adyang.blogger.article;
 
+import com.adyang.blogger.comment.Comment;
+import com.adyang.blogger.comment.CommentForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
