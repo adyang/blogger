@@ -15,6 +15,16 @@
             </a>
         </form>
         <a th:href="@{/articles/{id}/edit(id=${article.id})}">edit</a>
+
+        <h3>Comments (<span th:text="${#lists.size(article.comments)}">count</span>)</h3>
+        <div th:each="articleComment : ${article.comments}" th:include="_comment :: comment(${articleComment})">
+            Comments Content
+        </div>
+
+        <div th:include="comments/_form :: form">
+            Comment Form
+        </div>
+
         <a th:href="@{/articles}"><< Back to Articles List</a>
     </div>
 </body>

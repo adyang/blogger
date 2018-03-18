@@ -3,7 +3,6 @@ package com.adyang.blogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +31,11 @@ public class ArticlesController {
     }
 
     @GetMapping("/{id}")
-    public String show(@PathVariable Long id, Model model) {
-        Optional<Article> article = articleRepository.findById(id);
-        model.addAttribute("article", article.orElseThrow(ArticleNotFound::new));
+    public String  show(@PathVariable Long id, Model model) {
+        Optional<Article> foundArticle = articleRepository.findById(id);
+        Article article = foundArticle.orElseThrow(ArticleNotFound::new);
+        model.addAttribute("article", article);
+        model.addAttribute("commentForm", new CommentForm(article.getId()));
         return "show";
     }
 
@@ -96,12 +97,14 @@ public class ArticlesController {
     @Bean
     CommandLineRunner setUp() {
         return args -> {
-            articleRepository.save(new Article("titleOne", "body text one."));
-            articleRepository.save(new Article("titleTwo", "body text two."));
+            Article articleOne = new Article("titleOne", "body text one.");
+            articleRepository.save(articleOne);
+            Article titleTwo = new Article("titleTwo", "body text two.");
+            Comment commentTwo = new Comment();
+            commentTwo.setAuthorName("Chewbacca");
+            commentTwo.setBody("RAWR!");
+            titleTwo.addComment(commentTwo);
+            articleRepository.save(titleTwo);
         };
-    }
-
-    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Article no longer available")
-    private class ArticleNotFound extends RuntimeException {
     }
 }

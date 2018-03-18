@@ -29,6 +29,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
 	compile('nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect')
 	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.ocpsoft.prettytime:prettytime:4.0.1.Final')
 	runtime('org.springframework.boot:spring-boot-devtools')
 	runtime('com.h2database:h2')
 	compileOnly('org.projectlombok:lombok')

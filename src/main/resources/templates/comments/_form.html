@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Comment Form</title>
+</head>
+<body>
+    <div th:fragment="form">
+        <h3>Post a comment.</h3>
+        <form method="POST" action="#" th:action="@{/comments}" th:object="${commentForm}">
+            <p th:class="${#fields.hasErrors('authorName')}? field_with_errors">
+                <label for="authorName">Your Name</label><br />
+                <input type="text" th:field="*{authorName}" />
+            </p>
+            <p th:class="${#fields.hasErrors('body')}? field_with_errors">
+                <label for="body">Your Comment</label><br />
+                <textarea th:field="*{body}" />
+            </p>
+            <input type="hidden" th:field="*{articleId}" />
+            <p>
+                <input type="submit" value="Submit" />
+            </p>
+        </form>
+    </div>
+</body>
+</html>
