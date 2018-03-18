@@ -17,7 +17,7 @@
         <a th:href="@{/articles/{id}/edit(id=${article.id})}">edit</a>
 
         <h3>Comments (<span th:text="${#lists.size(article.comments)}">count</span>)</h3>
-        <div th:each="articleComment : ${article.comments}" th:include="_comment :: comment(${articleComment})">
+        <div th:each="articleComment : ${article.comments}" th:include="articles/_comment :: comment(${articleComment})">
             Comments Content
         </div>
 

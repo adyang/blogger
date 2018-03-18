@@ -17,6 +17,7 @@ import java.util.Optional;
 public class ArticlesController {
     private static final String ARTICLE_FORM = "articleForm";
     private static final String FLASH_NOTICE = "flashNotice";
+    private static final String ARTICLES_TEMPLATE_DIR = "articles/";
 
     private ArticleRepository articleRepository;
 
@@ -29,7 +30,7 @@ public class ArticlesController {
     public String index(Model model) {
         Iterable<Article> articles = articleRepository.findAll();
         model.addAttribute("articles", articles);
-        return "index";
+        return ARTICLES_TEMPLATE_DIR + "index";
     }
 
     @GetMapping("/{id}")
@@ -38,13 +39,13 @@ public class ArticlesController {
         Article article = foundArticle.orElseThrow(ArticleNotFound::new);
         model.addAttribute("article", article);
         model.addAttribute("commentForm", new CommentForm(article.getId()));
-        return "show";
+        return ARTICLES_TEMPLATE_DIR + "show";
     }
 
     @GetMapping("/new")
     public String newForm(Model model) {
         model.addAttribute(ARTICLE_FORM, new ArticleForm());
-        return "new";
+        return ARTICLES_TEMPLATE_DIR + "new";
     }
 
     @PostMapping
@@ -77,7 +78,7 @@ public class ArticlesController {
                 .map(a -> new ArticleForm(a.getId(), a.getTitle(), a.getBody()))
                 .orElseThrow(ArticleNotFound::new);
         model.addAttribute(ARTICLE_FORM, articleForm);
-        return "edit";
+        return ARTICLES_TEMPLATE_DIR + "edit";
     }
 
     @PutMapping("/{id}")
