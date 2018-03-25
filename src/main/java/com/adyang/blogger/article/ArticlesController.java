@@ -2,6 +2,8 @@ package com.adyang.blogger.article;
 
 import com.adyang.blogger.comment.Comment;
 import com.adyang.blogger.comment.CommentForm;
+import com.adyang.blogger.tag.Tag;
+import com.adyang.blogger.tag.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +12,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/articles")
@@ -20,10 +27,12 @@ public class ArticlesController {
     private static final String ARTICLES_TEMPLATE_DIR = "articles/";
 
     private ArticleRepository articleRepository;
+    private TagRepository tagRepository;
 
     @Autowired
-    public ArticlesController(ArticleRepository articleRepository) {
+    public ArticlesController(ArticleRepository articleRepository, TagRepository tagRepository) {
         this.articleRepository = articleRepository;
+        this.tagRepository = tagRepository;
     }
 
     @GetMapping
@@ -34,7 +43,7 @@ public class ArticlesController {
     }
 
     @GetMapping("/{id}")
-    public String  show(@PathVariable Long id, Model model) {
+    public String show(@PathVariable Long id, Model model) {
         Optional<Article> foundArticle = articleRepository.findById(id);
         Article article = foundArticle.orElseThrow(ArticleNotFound::new);
         model.addAttribute("article", article);
@@ -48,14 +57,35 @@ public class ArticlesController {
         return ARTICLES_TEMPLATE_DIR + "new";
     }
 
+    @Transactional
     @PostMapping
     public String create(ArticleForm articleForm, RedirectAttributes model) {
-        Article newArticle = new Article(articleForm.getTitle(), articleForm.getBody());
+        Article newArticle = mapNewArticle(articleForm);
         Article savedArticle = articleRepository.save(newArticle);
-
         model.addFlashAttribute(FLASH_NOTICE, String.format("Article '%s' Created!", savedArticle.getTitle()));
-
         return "redirect:/articles/" + savedArticle.getId();
+    }
+
+    private Article mapNewArticle(ArticleForm articleForm) {
+        Article newArticle = new Article(articleForm.getTitle(), articleForm.getBody());
+        List<Tag> tags = parseTagList(articleForm.getTagList());
+        for (Tag tag : tags)
+            newArticle.addTag(tag);
+        return newArticle;
+    }
+
+    private List<Tag> parseTagList(String tagList) {
+        return Stream.of(tagList.split(","))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .distinct()
+                .map(this::findOrCreateTag)
+                .collect(Collectors.toList());
+    }
+
+    private Tag findOrCreateTag(String name) {
+        return tagRepository.findOneByName(name)
+                .orElseGet(() -> new Tag(name));
     }
 
     @DeleteMapping("/{id}")
@@ -75,16 +105,30 @@ public class ArticlesController {
     public String edit(@PathVariable Long id, Model model) {
         Optional<Article> article = articleRepository.findById(id);
         ArticleForm articleForm = article
-                .map(a -> new ArticleForm(a.getId(), a.getTitle(), a.getBody()))
+                .map(this::toArticleForm)
                 .orElseThrow(ArticleNotFound::new);
         model.addAttribute(ARTICLE_FORM, articleForm);
         return ARTICLES_TEMPLATE_DIR + "edit";
     }
 
+    private ArticleForm toArticleForm(Article a) {
+        ArticleForm articleForm = new ArticleForm(a.getId(), a.getTitle(), a.getBody());
+        articleForm.setTagList(convertToString(a.getTags()));
+        return articleForm;
+    }
+
+    private String convertToString(List<Tag> tags) {
+        return tags.stream()
+                .map(Tag::getName)
+                .collect(Collectors.joining(", "));
+    }
+
+    @Transactional
     @PutMapping("/{id}")
     public String update(@PathVariable Long id, ArticleForm articleForm, RedirectAttributes model) {
         Article article = findArticleBy(id);
         mapArticle(articleForm, article);
+        updateArticleTags(article, articleForm.getTagList());
         articleRepository.save(article);
 
         model.addFlashAttribute(FLASH_NOTICE, String.format("Article '%s' Updated!", article.getTitle()));
@@ -97,17 +141,44 @@ public class ArticlesController {
         article.setBody(articleForm.getBody());
     }
 
+    private void updateArticleTags(Article article, String tagList) {
+        List<Tag> articleFormTags = parseTagList(tagList);
+        removeMissingTags(article, articleFormTags);
+        List<Tag> newTags = filterNewTags(article, articleFormTags);
+        tagRepository.saveAll(newTags);
+        newTags.forEach(article::addTag);
+    }
+
+    private List<Tag> filterNewTags(Article article, List<Tag> articleFormTags) {
+        Predicate<Tag> tagWhichIsNew = formTag -> !article.getTags().contains(formTag);
+        return articleFormTags.stream()
+                .filter(tagWhichIsNew)
+                .collect(Collectors.toList());
+    }
+
+    private void removeMissingTags(Article article, List<Tag> articleFormTags) {
+        article.getTags().stream()
+                .filter(tag -> !articleFormTags.contains(tag))
+                .forEach(article::removeTag);
+    }
+
     @Bean
     CommandLineRunner setUp() {
         return args -> {
             Article articleOne = new Article("titleOne", "body text one.");
+            articleOne.addTag(new Tag("tagone"));
             articleRepository.save(articleOne);
+
             Article titleTwo = new Article("titleTwo", "body text two.");
             Comment commentTwo = new Comment();
             commentTwo.setAuthorName("Chewbacca");
             commentTwo.setBody("RAWR!");
             titleTwo.addComment(commentTwo);
             articleRepository.save(titleTwo);
+
+
+            Optional<Article> article = articleRepository.findById(articleOne.getId());
+            System.out.println(article.map(Article::getTags).orElseThrow(ArticleNotFound::new));
         };
     }
 }

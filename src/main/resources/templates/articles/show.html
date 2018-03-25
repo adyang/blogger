@@ -7,6 +7,14 @@
 <body>
     <div layout:fragment="content">
         <h1 th:text="${article.title}">Article Title</h1>
+
+        <p>
+            Tags:
+            <a th:each="tag : ${article.tags}" th:href="@{/tags/{id}(id=${tag.id})}">
+                <span th:text="${tag.name}">Tag Name</span>
+            </a>
+        </p>
+
         <p th:text="${article.body}">Article Body</p>
 
         <form th:action="@{/articles/{id}(id=${article.id})}" th:method="delete" id="delete-link">
