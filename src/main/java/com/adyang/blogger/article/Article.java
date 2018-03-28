@@ -6,10 +6,7 @@ import com.adyang.blogger.tag.Tag;
 import com.adyang.blogger.tag.Tagging;
 import lombok.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,13 +21,17 @@ public class Article extends BaseEntity {
     private String title;
     @Lob
     private String body;
+
     @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
-    Set<Comment> comments = new HashSet<>();
+    private Set<Comment> comments = new HashSet<>();
 
     @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
-    Set<Tagging> taggings = new HashSet<>();
+    private Set<Tagging> taggings = new HashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Image image;
 
     public Article(String title, String body) {
         this.title = title;
@@ -49,7 +50,6 @@ public class Article extends BaseEntity {
 
     public void addTag(Tag tag) {
         Tagging tagging = new Tagging(this, tag);
-        System.out.println("tagging: " + tagging);
         taggings.add(tagging);
         tag.getTaggings().add(tagging);
     }

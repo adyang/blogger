@@ -8,7 +8,7 @@
     <div layout:fragment="content">
         <h1>Create a New Article</h1>
 
-        <form method="POST" action="#" th:action="@{/articles}" th:object="${articleForm}">
+        <form method="POST" action="#" th:action="@{/articles}" th:object="${articleForm}" enctype="multipart/form-data">
             <ul>
                 <li th:each="err : ${#fields.errors('*')}" th:text="${err}" />
             </ul>
@@ -23,6 +23,10 @@
             <p th:class="${#fields.hasErrors('tagList')}? field_with_errors">
                 <label for="tagList">Tag List</label><br />
                 <input type="text" th:field="*{tagList}" />
+            </p>
+            <p>
+                <label for="image">Attach an Image</label><br />
+                <input type="file" name="image" />
             </p>
             <p>
                 <input type="submit" value="Create" />

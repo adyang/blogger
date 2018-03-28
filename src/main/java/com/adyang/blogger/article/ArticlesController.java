@@ -10,9 +10,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -59,11 +64,25 @@ public class ArticlesController {
 
     @Transactional
     @PostMapping
-    public String create(ArticleForm articleForm, RedirectAttributes model) {
+    public String create(ArticleForm articleForm, @RequestParam("image") MultipartFile file, RedirectAttributes model) throws IOException {
         Article newArticle = mapNewArticle(articleForm);
+        overwriteImage(newArticle, file);
         Article savedArticle = articleRepository.save(newArticle);
         model.addFlashAttribute(FLASH_NOTICE, String.format("Article '%s' Created!", savedArticle.getTitle()));
         return "redirect:/articles/" + savedArticle.getId();
+    }
+
+    private void overwriteImage(Article article, MultipartFile file) throws IOException {
+        Image image = createImage(file);
+        article.setImage(image);
+    }
+
+    private Image createImage(MultipartFile file) throws IOException {
+        if (file.isEmpty())
+            return null;
+        String fileName = Instant.now().getEpochSecond() + "_" + file.getOriginalFilename();
+        Files.copy(file.getInputStream(), Paths.get(ImagesController.IMAGE_DIR, fileName));
+        return new Image(fileName, file.getContentType(), file.getSize());
     }
 
     private Article mapNewArticle(ArticleForm articleForm) {
@@ -114,6 +133,9 @@ public class ArticlesController {
     private ArticleForm toArticleForm(Article a) {
         ArticleForm articleForm = new ArticleForm(a.getId(), a.getTitle(), a.getBody());
         articleForm.setTagList(convertToString(a.getTags()));
+        Optional.ofNullable(a.getImage())
+                .map(Image::getId)
+                .ifPresent(articleForm::setImageId);
         return articleForm;
     }
 
@@ -125,9 +147,10 @@ public class ArticlesController {
 
     @Transactional
     @PutMapping("/{id}")
-    public String update(@PathVariable Long id, ArticleForm articleForm, RedirectAttributes model) {
+    public String update(@PathVariable Long id, ArticleForm articleForm, @RequestParam("image") MultipartFile file, RedirectAttributes model) throws IOException {
         Article article = findArticleBy(id);
         mapArticle(articleForm, article);
+        overwriteImage(article, file);
         updateArticleTags(article, articleForm.getTagList());
         articleRepository.save(article);
 

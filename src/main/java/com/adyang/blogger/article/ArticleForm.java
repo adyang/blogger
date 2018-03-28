@@ -8,6 +8,7 @@ public class ArticleForm {
     private String title;
     private String body;
     private String tagList;
+    private Long imageId;
 
     protected ArticleForm() {
     }

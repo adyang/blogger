@@ -8,7 +8,8 @@
     <div layout:fragment="content">
         <h1>Edit an Article</h1>
 
-        <form th:method="PUT" action="#" th:object="${articleForm}" th:action="@{/articles/{id}(id=${articleForm.id})}">
+        <form th:method="PUT" action="#" th:object="${articleForm}" th:action="@{/articles/{id}(id=${articleForm.id})}"
+              enctype="multipart/form-data">
             <ul>
                 <li th:each="err : ${#fields.errors('*')}" th:text="${err}" />
             </ul>
@@ -23,6 +24,11 @@
             <p th:class="${#fields.hasErrors('tagList')}? field_with_errors">
                 <label for="tagList">Tag List</label><br />
                 <input type="text" th:field="*{tagList}" />
+            </p>
+            <p>
+                <img th:if="*{imageId}" th:src="@{/images/{id}(id=*{imageId})}" /><br />
+                <label for="image">Attach a New Image</label><br />
+                <input type="file" name="image" />
             </p>
             <p>
                 <input type="submit" value="Update" />

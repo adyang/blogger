@@ -15,6 +15,8 @@
             </a>
         </p>
 
+        <p><img th:if="${article.image}" th:src="@{/images/{id}(id=${article.image.id})}" /></p>
+
         <p th:text="${article.body}">Article Body</p>
 
         <form th:action="@{/articles/{id}(id=${article.id})}" th:method="delete" id="delete-link">
